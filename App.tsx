@@ -27,10 +27,10 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-950">
+    <div className="flex h-screen w-full overflow-hidden bg-zinc-950">
       {/* Mobile Sidebar Toggle */}
       <button 
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 text-white rounded shadow-lg border border-slate-700"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-zinc-800 text-white rounded shadow-lg border border-zinc-700"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
         {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
@@ -59,7 +59,7 @@ export default function App() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden relative">
         {/* Lesson View */}
-        <div className="w-full md:w-1/2 lg:w-3/5 h-1/2 md:h-full overflow-hidden border-r border-slate-800">
+        <div className="w-full md:w-1/2 lg:w-3/5 h-1/2 md:h-full overflow-hidden border-r border-zinc-800">
           <LessonContent lesson={activeLesson} />
         </div>
 
