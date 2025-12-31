@@ -302,5 +302,71 @@ Docker creates a dedicated network, starts both services, and connects them.
         ]
       }
     ]
+  },
+  {
+    id: 'm6',
+    title: 'Module 6: Orchestration',
+    description: 'Advanced Docker orchestration with Kubernetes concepts.',
+    difficulty: Difficulty.PRO,
+    lessons: [
+      {
+        id: 'l6-1',
+        title: 'Introduction to Orchestration',
+        content: `When you have hundreds of containers across dozens of servers, \`docker run\` and \`docker-compose\` aren't enough. You need an **Orchestrator**.
+
+### What is Orchestration?
+It is the automated configuration, coordination, and management of computer systems and software.
+*   **Scheduling**: Deciding which server hosts which container.
+*   **Healing**: Restarting failed containers automatically.
+*   **Scaling**: Increasing container counts during high traffic.
+
+### The Standard: Kubernetes (K8s)
+Kubernetes has won the orchestration war. It abstracts the hardware infrastructure, allowing you to treat a cluster of servers as a single computer.`,
+        rhelNotes: "Red Hat's Enterprise Kubernetes solution is **OpenShift**. It is built on top of RHEL and standard Kubernetes, adding developer tools and stricter security defaults.",
+        exercises: [
+          {
+            id: 'e6-1',
+            question: "What is the primary function of an orchestrator regarding failed containers?",
+            expectedCommand: "healing",
+            hint: "It starts with H. It involves restarting them automatically."
+          }
+        ]
+      },
+      {
+        id: 'l6-2',
+        title: 'Basic Pods and Deployments',
+        content: `In the orchestration world, we don't just run "containers". We run **Pods**.
+
+### The Pod
+A Pod is a wrapper around one or more containers.
+*   Containers in a Pod share the same IP address.
+*   They share the same storage volumes.
+*   They live and die together.
+
+### The Deployment
+You rarely create a Pod directly. You create a **Deployment**.
+A Deployment says: "Ensure 3 copies (replicas) of the Nginx Pod are always running."
+
+### RHEL & Podman Integration
+Uniquely, RHEL's Podman can interact with Kubernetes definitions.
+\`\`\`bash
+# Generate K8s YAML from a running container
+podman generate kube my-container > pod.yaml
+
+# Run a K8s YAML locally without a cluster!
+podman play kube pod.yaml
+\`\`\`
+`,
+        rhelNotes: "`podman play kube` is a powerful feature in RHEL9. It allows developers to use production Kubernetes YAML files on their local laptops without the overhead of running Minikube or Kind.",
+        exercises: [
+          {
+            id: 'e6-2',
+            question: "Which Podman command allows you to execute a Kubernetes YAML file locally?",
+            expectedCommand: "podman play kube",
+            hint: "It involves 'playing' the kube file."
+          }
+        ]
+      }
+    ]
   }
 ];

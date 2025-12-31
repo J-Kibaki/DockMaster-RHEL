@@ -1,20 +1,42 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# DockMaster RHEL
 
-# Run and deploy your AI Studio app
+A comprehensive interactive learning platform to master Docker in RHEL9 environments.
 
-This contains everything you need to run your app locally.
+## Development
 
-View your app in AI Studio: https://ai.studio/apps/drive/1pn9_WwPRXDURNKdWNl8s-f0-KGaUh22J
+```bash
+npm install
+npm run dev
+```
 
-## Run Locally
+## Docker Deployment
 
-**Prerequisites:**  Node.js
+This application is containerized using a multi-stage Docker build (Node.js for building, Nginx for serving).
 
+### Prerequisites
+- Docker installed on your machine.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Build the Image
+
+```bash
+docker build -t dockmaster-rhel .
+```
+
+### Run the Container
+
+```bash
+docker run -d -p 8080:80 --name dockmaster dockmaster-rhel
+```
+
+The application will be accessible at `http://localhost:8080`.
+
+### Environment Variables
+
+If you are using the AI Tutor features, you must pass the API Key at runtime (note: this requires updating the frontend to accept runtime config, or rebuilding with the ENV var baked in, though strictly `process.env` in Vite is build-time).
+
+For production usage of the API key, it is recommended to proxy the requests or inject the variable during the build time if using client-side calls.
+
+```bash
+# Example passing build arg if configured
+docker build --build-arg VITE_API_KEY=your_key -t dockmaster-rhel .
+```
