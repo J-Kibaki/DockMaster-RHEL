@@ -77,7 +77,7 @@ const Terminal: React.FC<TerminalProps> = ({ currentLesson, onCompleteLesson }) 
     } else {
         // Tutor Mode
         const historyForAi = output.slice(-6); // Keep context small
-        const response = await askTutor(historyForAi, cmd);
+        const response = await askTutor(historyForAi, cmd, currentLesson.rhelNotes);
         setOutput(prev => [...prev, { role: 'model', text: response }]);
     }
 

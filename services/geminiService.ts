@@ -51,17 +51,27 @@ export const checkAnswerWithGemini = async (
   }
 };
 
-export const askTutor = async (history: {role: 'user' | 'model', text: string}[], userMessage: string): Promise<string> => {
+export const askTutor = async (
+  history: {role: 'user' | 'model', text: string}[], 
+  userMessage: string,
+  context?: string
+): Promise<string> => {
    if (!apiKey) return "Please configure your API Key to use the AI Tutor.";
 
    try {
      const model = "gemini-3-flash-preview";
      
+     let systemPrompt = "You are an expert DevOps engineer and instructor specializing in RHEL9 and Docker. Keep answers concise, technical, and helpful. Use markdown for code.";
+     
+     if (context) {
+        systemPrompt += `\n\nRelevant RHEL9/Docker Context for this lesson: ${context}`;
+     }
+     
      // Construct chat contents manually
      const contents = [
        {
          role: 'user',
-         parts: [{ text: "You are an expert DevOps engineer and instructor specializing in RHEL9 and Docker. Keep answers concise, technical, and helpful. Use markdown for code." }]
+         parts: [{ text: systemPrompt }]
        },
        ...history.map(h => ({
          role: h.role,
