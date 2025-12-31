@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { ROADMAP } from '../constants';
 import { Module, Lesson, Difficulty } from '../types';
-import { BookOpen, CheckCircle, Server, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { BookOpen, CheckCircle, Server, ChevronLeft, ChevronRight, RotateCcw, Trophy } from 'lucide-react';
 
 interface SidebarProps {
   currentLessonId: string;
@@ -39,13 +39,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentLessonId, onSelectLesson, comp
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {ROADMAP.map((module) => {
             const moduleCompletedCount = module.lessons.filter(l => completedLessons.includes(l.id)).length;
+            const isModuleCompleted = module.lessons.length > 0 && moduleCompletedCount === module.lessons.length;
             const isModuleStarted = moduleCompletedCount > 0;
 
             return (
               <div key={module.id}>
                 <div className="flex justify-between items-center mb-2 px-2 group/module">
                   <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{module.title}</h3>
+                      {isModuleCompleted && <Trophy size={14} className="text-emerald-500 animate-pulse" />}
+                      <h3 className={`text-sm font-semibold uppercase tracking-wider ${isModuleCompleted ? 'text-emerald-400' : 'text-zinc-400'}`}>{module.title}</h3>
                       {isModuleStarted && (
                         <button 
                             onClick={(e) => {
