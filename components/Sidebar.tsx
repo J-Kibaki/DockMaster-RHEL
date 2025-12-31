@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react';
 import { ROADMAP } from '../constants';
 import { Module, Lesson, Difficulty } from '../types';
-import { BookOpen, CheckCircle, Server, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, CheckCircle, Server, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 
 interface SidebarProps {
   currentLessonId: string;
   onSelectLesson: (module: Module, lesson: Lesson) => void;
   completedLessons: string[];
+  onResetModule: (moduleId: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentLessonId, onSelectLesson, completedLessons }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentLessonId, onSelectLesson, completedLessons, onResetModule }) => {
   
   // Calculate navigation context
   const { prevLesson, nextLesson } = useMemo(() => {
@@ -36,47 +37,68 @@ const Sidebar: React.FC<SidebarProps> = ({ currentLessonId, onSelectLesson, comp
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {ROADMAP.map((module) => (
-          <div key={module.id}>
-            <div className="flex justify-between items-center mb-2 px-2">
-              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{module.title}</h3>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                module.difficulty === Difficulty.BEGINNER ? 'bg-emerald-900/30 text-emerald-400' :
-                module.difficulty === Difficulty.INTERMEDIATE ? 'bg-amber-900/30 text-amber-400' :
-                'bg-red-900/30 text-red-400'
-              }`}>
-                {module.difficulty}
-              </span>
-            </div>
-            <div className="space-y-1">
-              {module.lessons.map((lesson) => {
-                const isActive = lesson.id === currentLessonId;
-                const isCompleted = completedLessons.includes(lesson.id);
-                
-                return (
-                  <button
-                    key={lesson.id}
-                    onClick={() => onSelectLesson(module, lesson)}
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-all duration-200 text-left group ${
-                      isActive 
-                        ? 'bg-red-900/10 text-red-400 border border-red-500/20' 
-                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
-                    }`}
-                  >
-                    <div className={`min-w-4 w-4`}>
-                        {isCompleted ? (
-                             <CheckCircle size={16} className="text-emerald-500" />
-                        ) : (
-                            <BookOpen size={16} className={isActive ? 'text-red-500' : 'opacity-50'} />
-                        )}
-                    </div>
-                    <span className="truncate">{lesson.title}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+        {ROADMAP.map((module) => {
+            const moduleCompletedCount = module.lessons.filter(l => completedLessons.includes(l.id)).length;
+            const isModuleStarted = moduleCompletedCount > 0;
+
+            return (
+              <div key={module.id}>
+                <div className="flex justify-between items-center mb-2 px-2 group/module">
+                  <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{module.title}</h3>
+                      {isModuleStarted && (
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if(window.confirm(`Reset progress for ${module.title}?`)) {
+                                    onResetModule(module.id);
+                                }
+                            }}
+                            className="opacity-0 group-hover/module:opacity-100 transition-opacity text-zinc-600 hover:text-red-400 p-1"
+                            title="Reset Module Progress"
+                        >
+                            <RotateCcw size={12} />
+                        </button>
+                      )}
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                    module.difficulty === Difficulty.BEGINNER ? 'bg-emerald-900/30 text-emerald-400' :
+                    module.difficulty === Difficulty.INTERMEDIATE ? 'bg-amber-900/30 text-amber-400' :
+                    'bg-red-900/30 text-red-400'
+                  }`}>
+                    {module.difficulty}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {module.lessons.map((lesson) => {
+                    const isActive = lesson.id === currentLessonId;
+                    const isCompleted = completedLessons.includes(lesson.id);
+                    
+                    return (
+                      <button
+                        key={lesson.id}
+                        onClick={() => onSelectLesson(module, lesson)}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-all duration-200 text-left group ${
+                          isActive 
+                            ? 'bg-red-900/10 text-red-400 border border-red-500/20' 
+                            : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
+                        }`}
+                      >
+                        <div className={`min-w-4 w-4`}>
+                            {isCompleted ? (
+                                 <CheckCircle size={16} className="text-emerald-500" />
+                            ) : (
+                                <BookOpen size={16} className={isActive ? 'text-red-500' : 'opacity-50'} />
+                            )}
+                        </div>
+                        <span className="truncate">{lesson.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+        })}
       </div>
       
       <div className="p-4 border-t border-zinc-800 bg-zinc-950/50 space-y-4">

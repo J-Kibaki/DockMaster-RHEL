@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import LessonContent from './components/LessonContent';
 import Terminal from './components/Terminal';
@@ -9,8 +9,27 @@ import { Menu, X } from 'lucide-react';
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>(ROADMAP[0]);
   const [activeLesson, setActiveLesson] = useState<Lesson>(ROADMAP[0].lessons[0]);
-  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  
+  // Initialize from localStorage for robust persistence
+  const [completedLessons, setCompletedLessons] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('dockmaster_progress');
+        try {
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            console.error("Failed to parse progress", e);
+            return [];
+        }
+    }
+    return [];
+  });
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Persist progress changes
+  useEffect(() => {
+    localStorage.setItem('dockmaster_progress', JSON.stringify(completedLessons));
+  }, [completedLessons]);
 
   const handleLessonSelect = (module: Module, lesson: Lesson) => {
     setActiveModule(module);
@@ -24,6 +43,22 @@ export default function App() {
     if (!completedLessons.includes(lessonId)) {
       setCompletedLessons(prev => [...prev, lessonId]);
     }
+  };
+
+  const handleToggleLessonCompletion = (lessonId: string) => {
+    setCompletedLessons(prev => 
+        prev.includes(lessonId) 
+            ? prev.filter(id => id !== lessonId) 
+            : [...prev, lessonId]
+    );
+  };
+
+  const handleResetModuleProgress = (moduleId: string) => {
+    const module = ROADMAP.find(m => m.id === moduleId);
+    if (!module) return;
+    
+    const moduleLessonIds = module.lessons.map(l => l.id);
+    setCompletedLessons(prev => prev.filter(id => !moduleLessonIds.includes(id)));
   };
 
   return (
@@ -45,6 +80,7 @@ export default function App() {
           currentLessonId={activeLesson.id}
           onSelectLesson={handleLessonSelect}
           completedLessons={completedLessons}
+          onResetModule={handleResetModuleProgress}
         />
       </div>
 
@@ -60,7 +96,11 @@ export default function App() {
       <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden relative">
         {/* Lesson View */}
         <div className="w-full md:w-1/2 lg:w-3/5 h-1/2 md:h-full overflow-hidden border-r border-zinc-800">
-          <LessonContent lesson={activeLesson} />
+          <LessonContent 
+            lesson={activeLesson} 
+            isCompleted={completedLessons.includes(activeLesson.id)}
+            onToggleCompletion={() => handleToggleLessonCompletion(activeLesson.id)}
+          />
         </div>
 
         {/* Terminal/Interactive View */}

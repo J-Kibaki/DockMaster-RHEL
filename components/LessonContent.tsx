@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Lesson } from '../types';
-import { Info, AlertTriangle, ExternalLink, Copy, Check } from 'lucide-react';
+import { Info, AlertTriangle, ExternalLink, Copy, Check, CheckCircle, Circle } from 'lucide-react';
 
 interface LessonContentProps {
   lesson: Lesson;
+  isCompleted: boolean;
+  onToggleCompletion: () => void;
 }
 
 interface CodeBlockProps {
@@ -92,7 +94,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
   );
 };
 
-const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
+const LessonContent: React.FC<LessonContentProps> = ({ lesson, isCompleted, onToggleCompletion }) => {
   // Simple parser to separate code blocks from text
   const renderContent = () => {
     // Split by triple backticks
@@ -165,13 +167,26 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
     <div className="h-full overflow-y-auto p-6 md:p-8 bg-zinc-950 custom-scrollbar">
       <div className="max-w-3xl mx-auto space-y-8 pb-12">
         {/* Header */}
-        <header className="border-b border-zinc-800 pb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 mb-3">{lesson.title}</h1>
-          <div className="flex flex-wrap items-center gap-3 text-zinc-400 text-sm">
-            <span className="bg-blue-900/20 text-blue-300 border border-blue-500/20 px-2 py-0.5 rounded">RHEL 9 Compatible</span>
-            <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
-            <span>Beginner Friendly</span>
+        <header className="border-b border-zinc-800 pb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 mb-3">{lesson.title}</h1>
+            <div className="flex flex-wrap items-center gap-3 text-zinc-400 text-sm">
+                <span className="bg-blue-900/20 text-blue-300 border border-blue-500/20 px-2 py-0.5 rounded">RHEL 9 Compatible</span>
+                <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
+                <span>Beginner Friendly</span>
+            </div>
           </div>
+          <button 
+            onClick={onToggleCompletion}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                isCompleted 
+                ? 'bg-emerald-900/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-900/40' 
+                : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700'
+            }`}
+          >
+            {isCompleted ? <CheckCircle size={14} /> : <Circle size={14} />}
+            {isCompleted ? 'Completed' : 'Mark Complete'}
+          </button>
         </header>
 
         {/* Main Content Render */}

@@ -43,19 +43,33 @@ const Terminal: React.FC<TerminalProps> = ({ currentLesson, onCompleteLesson }) 
     setOutput(newHistory);
 
     if (mode === 'practice') {
-        const currentExercise = currentLesson.exercises[0]; // Simplification for demo: 1 exercise per lesson
+        const currentExercise = currentLesson.exercises[0];
         if (currentExercise) {
-             const result = await checkAnswerWithGemini(
-                 currentExercise.question, 
-                 cmd, 
-                 currentLesson.rhelNotes
-             );
+             let isCorrect = false;
+             let explanation = "";
 
-             if (result.correct) {
-                 setOutput(prev => [...prev, { role: 'model', text: `✅ Correct!\n\n${result.explanation}` }]);
+             // 1. ROBUSTNESS: Fast exact/normalized check first.
+             // This ensures correct answers work even if AI is offline or hallucinates.
+             if (currentExercise.expectedCommand && 
+                 cmd.replace(/\s+/g, ' ').trim() === currentExercise.expectedCommand.replace(/\s+/g, ' ').trim()) {
+                 isCorrect = true;
+                 explanation = "Perfect match!";
+             } else {
+                 // 2. Fallback to AI for semantic understanding (e.g. flag order, aliases)
+                 const result = await checkAnswerWithGemini(
+                     currentExercise.question, 
+                     cmd, 
+                     currentLesson.rhelNotes
+                 );
+                 isCorrect = result.correct;
+                 explanation = result.explanation;
+             }
+
+             if (isCorrect) {
+                 setOutput(prev => [...prev, { role: 'model', text: `✅ Correct!\n\n${explanation}` }]);
                  onCompleteLesson(currentLesson.id);
              } else {
-                 setOutput(prev => [...prev, { role: 'model', text: `❌ Incorrect.\n\n${result.explanation}\n\nHint: ${currentExercise.hint}`, isError: true }]);
+                 setOutput(prev => [...prev, { role: 'model', text: `❌ Incorrect.\n\n${explanation}\n\nHint: ${currentExercise.hint}`, isError: true }]);
              }
         } else {
              setOutput(prev => [...prev, { role: 'model', text: "No active exercise for this lesson. Switch to Tutor mode to ask questions." }]);

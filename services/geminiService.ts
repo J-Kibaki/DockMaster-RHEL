@@ -9,19 +9,29 @@ export const checkAnswerWithGemini = async (
   context: string
 ): Promise<{ correct: boolean; explanation: string }> => {
   if (!apiKey) {
-    return { correct: false, explanation: "API Key missing. Cannot validate." };
+    // If no API key, we rely on the caller (Terminal) to handle exact matches.
+    // If we reach here, it means exact match failed and we can't do semantic check.
+    return { correct: false, explanation: "API Key missing. Cannot validate semantic answer. Please try the exact expected command." };
   }
 
   try {
     const model = "gemini-3-flash-preview";
     const prompt = `
-      Context: Teaching Docker on RHEL9.
+      You are a strict RHEL9 Docker instructor.
+      
+      Task: Validate if the user's command correctly answers the question in an RHEL9 environment.
+      
       Question: ${question}
       RHEL/Docker Context: ${context}
       User Answer: ${userAnswer}
       
-      Is the user's answer correct or effectively correct (e.g. valid syntax)? 
-      Return a JSON object: { "correct": boolean, "explanation": "short explanation" }
+      Criteria:
+      1. Syntax must be valid for 'docker' or 'podman' CLI.
+      2. It must achieve the specific goal asked.
+      3. Be strict about RHEL nuances (e.g. using :Z for volumes if mentioned in context).
+      4. Allow valid aliases (e.g. 'docker container ls' == 'docker ps').
+      
+      Return a JSON object: { "correct": boolean, "explanation": "short concise explanation" }
     `;
 
     const response = await ai.models.generateContent({
@@ -47,7 +57,7 @@ export const askTutor = async (history: {role: 'user' | 'model', text: string}[]
    try {
      const model = "gemini-3-flash-preview";
      
-     // Construct chat contents manually as the simple Chat helper isn't used here for statelessness or we use generateContent with history
+     // Construct chat contents manually
      const contents = [
        {
          role: 'user',
